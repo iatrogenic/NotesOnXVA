@@ -1,0 +1,65 @@
+\documentclass[]{article}
+
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+
+ \newcommand{\PP}{{\mathbb P}} 
+ \newcommand{\EE}{{\mathbb E}} 
+
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}[section]
+
+%opening
+\title{XVA notes}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Introduction}
+\begin{definition}
+	\textbf{Counterparty credit exposure} is the amount a company could potentially lose in the event of one of its counterparties defaulting.
+\end{definition}
+Associated to the measurement of counterparty credit exposure is the price of its hedging. This price we call the \textit{Credit Valuation Adjustment} (CVA).
+
+The management of this exposure can be done through a CSA (Credit Support Annex), which stipulates the terms regulating the exchange of collateral. Therefore, it is key for an XVA engine to model the dynamics of assets and the collateral.\footnote{Counterparty credit exposure can also be hedged by buying Credit Default Swaps (CDS).}
+
+\subsection{Modeling Counterparty Credit Exposure}
+\begin{definition}
+	Denote the value of a portfolio by $V_t$, the associated \textbf{PFE} is defined by
+	\[
+	\text{PFE}_{\alpha, t} = \inf \{x : \PP(V_t \leq x) \geq \alpha \}.
+	\]
+\end{definition}
+
+\begin{definition}
+	\[
+	\text{EPE}_t = \EE [ \max(V_t , 0)]
+	\]
+\end{definition}
+
+\begin{example}
+	Suppose we purchase a call option on a given stock $S$ with strike $K$ and maturity $T$. The dynamics of $S$ are given by
+	\[
+	dS_t = (r-d)S_tdt + \sigma S_t dW_t
+	\]
+	where $d$ are the associated dividends and $r$ is the (assumed constant) risk-free rate. Let's compute the PFE at maturity at a confidence of $\alpha$. Note that
+	
+	\begin{align*}
+		\PP (S_T - K \leq x) &=  \PP ( \ln S_T \leq \ln(x-K) )\\
+		 &= \PP \left( \ln(S_0) + (r-d-\frac{\sigma^2}{2})T + \sigma W_T \leq \ln(x -K) \right) \\
+		 &= \PP \left( W_T \leq \ln(x-K) - \ln(S_0) - (r-d-\frac{\sigma^2}{2})T \right) \\
+		 &= N \left( \frac{\ln(x-K) - \ln(S_0) - (r-d-\frac{\sigma^2}{2})T}{\sigma \sqrt T}) \right).
+	\end{align*}
+	
+	If we assume that at maturity the option is in the money, using the above we get:
+	\begin{align*}
+	PFE_{\alpha, T} &= \inf \{ x : S_0 \exp \left( (r-d-\frac{\sigma^2}{2})T + \sigma \sqrt T N^{-1}(\alpha) \right) - K \leq x \} \\
+	&= S_0 \exp \left( (r-d-\frac{\sigma^2}{2})T + \sigma \sqrt T N^{-1}(\alpha) \right) - K .
+	\end{align*}
+\end{example}
+
+\end{document}
